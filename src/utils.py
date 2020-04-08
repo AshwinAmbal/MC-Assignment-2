@@ -1,0 +1,75 @@
+import pandas as pd
+import numpy as np
+import ast
+import os
+import json
+
+
+def trim_or_pad_data(data, TRIM_DATA_SIZE):
+    data = data.iloc[:TRIM_DATA_SIZE]
+    if data.shape[0] < TRIM_DATA_SIZE:
+        df = pd.DataFrame(np.zeros((TRIM_DATA_SIZE - data.shape[0], data.shape[1])))
+        data.append(df, ignore_index=True)
+    return data
+
+
+def general_normalization(column):
+    normRawData = (column - np.mean(column)) / (np.max(column - np.mean(column)) - np.min(column - np.mean(column)))
+    return normRawData
+
+
+def universal_normalization(column, data, x_norm):
+    if x_norm:
+        nose_x = data['nose_x']
+        leftEye_x = data['leftEye_x']
+        rightEye_x = data['rightEye_x']
+        normRawData =  (column - nose_x) / (rightEye_x-leftEye_x)
+    else:
+        nose_y = data['nose_y']
+        shoulder_y = data['rightShoulder_y']
+        normRawData = (column - nose_y) / (nose_y - shoulder_y)
+    return normRawData
+
+
+def jsonToCSV(data):
+    columns = ['score_overall', 'nose_score', 'nose_x', 'nose_y', 'leftEye_score', 'leftEye_x', 'leftEye_y',
+               'rightEye_score', 'rightEye_x', 'rightEye_y', 'leftEar_score', 'leftEar_x', 'leftEar_y',
+               'rightEar_score', 'rightEar_x', 'rightEar_y', 'leftShoulder_score', 'leftShoulder_x', 'leftShoulder_y',
+               'rightShoulder_score', 'rightShoulder_x', 'rightShoulder_y', 'leftElbow_score', 'leftElbow_x',
+               'leftElbow_y', 'rightElbow_score', 'rightElbow_x', 'rightElbow_y', 'leftWrist_score', 'leftWrist_x',
+               'leftWrist_y', 'rightWrist_score', 'rightWrist_x', 'rightWrist_y', 'leftHip_score', 'leftHip_x',
+               'leftHip_y', 'rightHip_score', 'rightHip_x', 'rightHip_y', 'leftKnee_score', 'leftKnee_x', 'leftKnee_y',
+               'rightKnee_score', 'rightKnee_x', 'rightKnee_y', 'leftAnkle_score', 'leftAnkle_x', 'leftAnkle_y',
+               'rightAnkle_score', 'rightAnkle_x', 'rightAnkle_y']
+    # data = ast.literal_eval(data)
+    csv_data = np.zeros((len(data), len(columns)))
+    for i in range(csv_data.shape[0]):
+        row = []
+        row.append(data[i]['score'])
+        for obj in data[i]['keypoints']:
+            row.append(obj['score'])
+            row.append(obj['position']['x'])
+            row.append(obj['position']['y'])
+        csv_data[i] = np.array(row)
+    df = pd.DataFrame(csv_data, columns=columns)
+    return df
+
+
+def feature_matrix_extractor(dirPath, listDir, extractor_method, pos_sample, th=-1):
+    featureMatrix = np.array([])
+    for dir in listDir:
+        files = os.listdir(os.path.join(dirPath, dir))
+        for i, file in enumerate(files):
+            if th != -1 and i >= th:
+                break
+            rawDataDict = []
+            for row in open(os.path.join(dirPath, dir, file)):
+                rawDataDict.extend(json.loads(row))
+            rawData = jsonToCSV(rawDataDict)
+            # rawData = pd.read_csv(os.path.join(dirPath, dir, file), sep=',')
+            featureVectorNotMother = extractor_method(rawData, pos_sample)
+            if featureMatrix.shape[0] == 0:
+                featureMatrix = np.array([featureVectorNotMother])
+            else:
+                featureMatrix = np.concatenate((featureMatrix, [featureVectorNotMother]), axis=0)
+    return featureMatrix
