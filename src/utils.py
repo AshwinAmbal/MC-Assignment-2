@@ -3,6 +3,16 @@ import numpy as np
 import ast
 import os
 import json
+import pickle
+from sklearn import svm
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neural_network import MLPClassifier
+
+
+INDEX_TO_GESTURE = {'A': 'buy', 'B': 'communicate', 'C': 'fun', 'D': 'hope', 'E': 'mother', 'F': 'really'}
+GESTURE_TO_INDEX = {'buy': 'A', 'communicate': 'B', 'fun': 'C', 'hope': 'D', 'mother': 'E', 'really': 'F'}
+MODEL_TO_INDEX = {'LogisticRegression': 1, 'SVC': 2, 'MLPClassifier': 3, 'GaussianNB': 4}
 
 
 def trim_or_pad_data(data, TRIM_DATA_SIZE):
@@ -73,3 +83,31 @@ def feature_matrix_extractor(dirPath, listDir, extractor_method, pos_sample, th=
             else:
                 featureMatrix = np.concatenate((featureMatrix, [featureVectorNotMother]), axis=0)
     return featureMatrix
+
+
+def modelAndSave(final_df, labelVector, gesture, pca, minmax):
+    # clf = svm.SVC(random_state=42)
+    clf = svm.SVC(random_state=42, probability=True)
+    clf.fit(final_df, labelVector)
+    writePickle(clf, gesture, pca, minmax)
+
+    clf = LogisticRegression(random_state=42)
+    clf.fit(final_df, labelVector)
+    writePickle(clf, gesture, pca, minmax)
+
+    clf = MLPClassifier(max_iter=5000, random_state=42)
+    clf.fit(final_df, labelVector)
+    writePickle(clf, gesture, pca, minmax)
+
+    clf = GaussianNB()
+    clf.fit(final_df, labelVector)
+    writePickle(clf, gesture, pca, minmax)
+
+
+def writePickle(clf, gesture, pca, minmax):
+    pickle.dump(clf, open(os.path.abspath('../models/model_{}/{}/model.pkl'.format(MODEL_TO_INDEX[clf.__class__.__name__],
+                                                                             GESTURE_TO_INDEX[gesture])), 'wb'))
+    pickle.dump(pca, open(os.path.abspath('../models/model_{}/{}/pca.pkl'.format(MODEL_TO_INDEX[clf.__class__.__name__],
+                                                                       GESTURE_TO_INDEX[gesture])), 'wb'))
+    pickle.dump(minmax, open(os.path.abspath('../models/model_{}/{}/minmax.pkl'.format(MODEL_TO_INDEX[clf.__class__.__name__],
+                                                                        GESTURE_TO_INDEX[gesture])), 'wb'))

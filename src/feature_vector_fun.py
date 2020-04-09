@@ -5,13 +5,13 @@ from sklearn.linear_model import LogisticRegression
 from src.pca_reduction import PCAReduction
 import os
 from src.utils import general_normalization, universal_normalization, trim_or_pad_data,	feature_matrix_extractor
-from sklearn.metrics import classification_report
-
+from src.utils import modelAndSave
 
 TRIM_DATA_SIZE_FUN = 150
+GESTURE = 'fun'
 
 
-def feature_vector_fun(data, isFun):
+def feature_vector_fun(data, isFun=False, test=False):
     trimmed_data = trim_or_pad_data(data, TRIM_DATA_SIZE_FUN)
     rX = trimmed_data['rightWrist_x']
 
@@ -56,10 +56,11 @@ def feature_vector_fun(data, isFun):
     if TRIM_DATA_SIZE_FUN - 1 > featureVector.shape[0]:
         featureVector = np.pad(featureVector, (0, TRIM_DATA_SIZE_FUN - featureVector.shape[0] - 1), 'constant')
     featureVector = featureVector[:TRIM_DATA_SIZE_FUN - 1]
-    if isFun:
-        featureVector = np.append(featureVector, 1)
-    else:
-        featureVector = np.append(featureVector, 0)
+    if not test:
+        if isFun:
+            featureVector = np.append(featureVector, 1)
+        else:
+            featureVector = np.append(featureVector, 0)
     return featureVector
 
 
@@ -82,18 +83,20 @@ def modeling_fun(dirPath):
 
     final_df, pca, minmax = PCAReduction(shuffled_df)
 
+    modelAndSave(final_df, labelVector, GESTURE, pca, minmax)
+
     # clf = svm.SVC(random_state=42, probability=True)
-    clf = svm.SVC(random_state=42)
+    # clf = svm.SVC(random_state=42)
     # clf = LogisticRegression(random_state=42)
     # 70:30 Train-Test Split
-    train_size = int(final_df.shape[0] * 70 / 100)
-    clf.fit(final_df.iloc[:train_size, :], labelVector[:train_size])
+    # train_size = int(final_df.shape[0] * 70 / 100)
+    # clf.fit(final_df.iloc[:train_size, :], labelVector[:train_size])
 
     # print(clf.predict_proba(final_df.iloc[train_size:, :]))
-    pred_labels = clf.predict(final_df.iloc[train_size:, :])
-    true_labels = labelVector[train_size:]
+    # pred_labels = clf.predict(final_df.iloc[train_size:, :])
+    # true_labels = labelVector[train_size:]
 
-    print(classification_report(true_labels, pred_labels))
+    # print(classification_report(true_labels, pred_labels))
 
 
 # TEST Function:
