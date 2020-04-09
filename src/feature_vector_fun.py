@@ -12,7 +12,55 @@ TRIM_DATA_SIZE_FUN = 150
 
 
 def feature_vector_fun(data, isFun):
-    pass
+    trimmed_data = trim_or_pad_data(data, TRIM_DATA_SIZE_FUN)
+    rX = trimmed_data['rightWrist_x']
+
+    normRawColumn = general_normalization(rX)
+    normRawColumn = universal_normalization(normRawColumn, trimmed_data, x_norm=True)
+
+    diffNormRawData = np.diff(normRawColumn)
+
+    zeroCrossingArray = np.array([])
+    maxDiffArray = np.array([])
+
+    if diffNormRawData[0] > 0:
+        initSign = 1
+    else:
+        initSign = 0
+
+    windowSize = 5
+
+    for x in range(1, len(diffNormRawData)):
+        if diffNormRawData[x] > 0:
+            newSign = 1
+        else:
+            newSign = 0
+
+        if initSign != newSign:
+            zeroCrossingArray = np.append(zeroCrossingArray, x)
+            initSign = newSign
+            maxIndex = np.minimum(len(diffNormRawData), x + windowSize)
+            minIndex = np.maximum(0, x - windowSize)
+
+            maxVal = np.amax(diffNormRawData[minIndex:maxIndex])
+            minVal = np.amin(diffNormRawData[minIndex:maxIndex])
+
+            maxDiffArray = np.append(maxDiffArray, (maxVal - minVal))
+
+    index = np.argsort(-maxDiffArray)
+
+    featureVector = np.array([])
+    featureVector = np.append(featureVector, diffNormRawData)
+    featureVector = np.append(featureVector, zeroCrossingArray[index[0:5]])
+    featureVector = np.append(featureVector, maxDiffArray[index[0:5]])
+    if TRIM_DATA_SIZE_FUN - 1 > featureVector.shape[0]:
+        featureVector = np.pad(featureVector, (0, TRIM_DATA_SIZE_FUN - featureVector.shape[0] - 1), 'constant')
+    featureVector = featureVector[:TRIM_DATA_SIZE_FUN - 1]
+    if isFun:
+        featureVector = np.append(featureVector, 1)
+    else:
+        featureVector = np.append(featureVector, 0)
+    return featureVector
 
 
 def modeling_fun(dirPath):
@@ -35,8 +83,8 @@ def modeling_fun(dirPath):
     final_df, pca, minmax = PCAReduction(shuffled_df)
 
     # clf = svm.SVC(random_state=42, probability=True)
-    # clf = svm.SVC(random_state=42)
-    clf = LogisticRegression(random_state=42)
+    clf = svm.SVC(random_state=42)
+    # clf = LogisticRegression(random_state=42)
     # 70:30 Train-Test Split
     train_size = int(final_df.shape[0] * 70 / 100)
     clf.fit(final_df.iloc[:train_size, :], labelVector[:train_size])
