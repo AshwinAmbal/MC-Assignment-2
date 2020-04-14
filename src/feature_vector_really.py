@@ -43,7 +43,8 @@ def feature_vector_really(data, isReally=False, test=False):
 	#Area under curve
 	auc = np.array([])
 	auc = np.append(auc, abs(integrate.simps(diffNormRawData, dx=5)))
-
+	
+	#Kurtosis
 	kur = np.array([])
 	kur = np.append(kur, kurtosis(diffNormRawData))
 
