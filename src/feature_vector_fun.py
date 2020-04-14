@@ -53,6 +53,7 @@ def feature_vector_fun(data, isFun=False, test=False):
     featureVector = np.append(featureVector, diffNormRawData)
     featureVector = np.append(featureVector, zeroCrossingArray[index[0:5]])
     featureVector = np.append(featureVector, maxDiffArray[index[0:5]])
+
     if TRIM_DATA_SIZE_FUN - 1 > featureVector.shape[0]:
         featureVector = np.pad(featureVector, (0, TRIM_DATA_SIZE_FUN - featureVector.shape[0] - 1), 'constant')
     featureVector = featureVector[:TRIM_DATA_SIZE_FUN - 1]
@@ -101,3 +102,5 @@ def modeling_fun(dirPath):
 
 # TEST Function:
 modeling_fun(os.path.abspath('../JSON'))
+
+

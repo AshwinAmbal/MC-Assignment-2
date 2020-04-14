@@ -10,7 +10,7 @@ from src.utils import general_normalization, universal_normalization, trim_or_pa
 from src.utils import feature_matrix_extractor, modelAndSave
 from sklearn.metrics import classification_report
 
-TRIM_DATA_SIZE_MOTHER = 150
+TRIM_DATA_SIZE_MOTHER = 159
 GESTURE = 'mother'
 
 
@@ -56,6 +56,10 @@ def feature_vector_mother(data, isMother=False, test=False):
 	featureVector = np.append(featureVector, diffNormRawData)
 	featureVector = np.append(featureVector, zeroCrossingArray[index[0:5]])
 	featureVector = np.append(featureVector, maxDiffArray[index[0:5]])
+
+
+
+	# print(featureVector.shape)
 	if TRIM_DATA_SIZE_MOTHER - 1> featureVector.shape[0]:
 		featureVector = np.pad(featureVector, (0, TRIM_DATA_SIZE_MOTHER - featureVector.shape[0] - 1), 'constant')
 	featureVector = featureVector[:TRIM_DATA_SIZE_MOTHER-1]
@@ -86,16 +90,17 @@ def modeling_mother(dirPath):
 
 	final_df, pca, minmax = PCAReduction(shuffled_df)
 
-	modelAndSave(final_df, labelVector, GESTURE, pca, minmax)
+	# modelAndSave(final_df, labelVector, GESTURE, pca, minmax)
 
 	# 70:30 Train-Test Split
-	# train_size = int(final_df.shape[0] * 70 / 100)
-	# clf.fit(final_df.iloc[:train_size, :], labelVector[:train_size])
+	clf = MLPClassifier(max_iter=5000, random_state=42)
+	train_size = int(final_df.shape[0] * 70 / 100)
+	clf.fit(final_df.iloc[:train_size, :], labelVector[:train_size])
 
-	# print(clf.predict_proba(final_df.iloc[train_size:, :]))
-	# pred_labels = clf.predict(final_df.iloc[train_size:, :])
-	# true_labels = labelVector[train_size:]
-	# print(classification_report(true_labels, pred_labels))
+	print(clf.predict_proba(final_df.iloc[train_size:, :]))
+	pred_labels = clf.predict(final_df.iloc[train_size:, :])
+	true_labels = labelVector[train_size:]
+	print(classification_report(true_labels, pred_labels))
 
 
 # TEST Function:
