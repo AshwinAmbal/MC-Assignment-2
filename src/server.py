@@ -6,6 +6,7 @@ from src.feature_vector_fun import feature_vector_fun
 from src.feature_vector_buy import feature_vector_buy
 from src.feature_vector_communicate import feature_vector_communicate
 from src.feature_vector_really import feature_vector_really
+from src.feature_vector_hope import feature_vector_hope
 
 import pickle
 import os
@@ -37,6 +38,7 @@ def predict():
     # hope = feature_vector_mother(extracted_df, test=True)
     mother = feature_vector_mother(extracted_df, test=True)
     really = feature_vector_really(extracted_df, test=True)
+    hope = feature_vector_hope(extracted_df, test=True)
     feature_vectors = [buy, communicate, fun, hope, mother, really]
     results = dict()
     for i in range(1, 5):
