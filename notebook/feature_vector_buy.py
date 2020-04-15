@@ -103,7 +103,7 @@ def modeling_buy(dirPath):
     buy_df = pd.DataFrame(featureMatrixBuy)
 
     # Number of negative samples per folder needed to balance the dataset with positive and negative samples
-    count_neg_samples = buy_df.shape[0] / 3
+    count_neg_samples = buy_df.shape[0] / 5
     listDir = ['communicate', 'really', 'hope', 'mother', 'fun']
     featureMatrixNotBuy = feature_matrix_extractor(dirPath, listDir, feature_vector_buy, pos_sample=False,
                                                       th=count_neg_samples)
@@ -134,4 +134,4 @@ def modeling_buy(dirPath):
 
 
 # TEST Function:
-modeling_buy(os.path.abspath('../JSON'))
+# modeling_buy(os.path.abspath('../JSON'))

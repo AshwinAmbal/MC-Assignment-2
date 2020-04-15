@@ -17,9 +17,9 @@ app = Flask(__name__)
 
 
 def get_result_from_model(model_index, gesture_id, feature_vector):
-    model = pickle.load(open(os.path.abspath('../models/model_{}/{}/model.pkl'.format(model_index, gesture_id)), 'rb'))
-    pca = pickle.load(open(os.path.abspath('../models/model_{}/{}/pca.pkl'.format(model_index, gesture_id)), 'rb'))
-    minmax = pickle.load(open(os.path.abspath('../models/model_{}/{}/minmax.pkl'.format(model_index, gesture_id)), 'rb'))
+    model = pickle.load(open(os.path.abspath('./models/model_{}/{}/model.pkl'.format(model_index, gesture_id)), 'rb'))
+    pca = pickle.load(open(os.path.abspath('./models/model_{}/{}/pca.pkl'.format(model_index, gesture_id)), 'rb'))
+    minmax = pickle.load(open(os.path.abspath('./models/model_{}/{}/minmax.pkl'.format(model_index, gesture_id)), 'rb'))
     feature_vector = pd.DataFrame([feature_vector])
     feature_vector = minmax.transform(feature_vector)
     feature_vector = pca.transform(feature_vector)

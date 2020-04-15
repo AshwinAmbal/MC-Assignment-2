@@ -74,7 +74,7 @@ def modeling_mother(dirPath):
 	mother_df = pd.DataFrame(featureMatrixMother)
 
 	# Number of negative samples per folder needed to balance the dataset for positive and negative samples
-	count_neg_samples = mother_df.shape[0] / 3
+	count_neg_samples = mother_df.shape[0] / 5
 	listDir = ['communicate', 'really', 'hope', 'fun', 'buy']
 	featureMatrixNotMother = feature_matrix_extractor(dirPath, listDir, feature_vector_mother, pos_sample=False,
 													  th=count_neg_samples)
@@ -104,4 +104,4 @@ def modeling_mother(dirPath):
 
 
 # TEST Function:
-modeling_mother(os.path.abspath('../JSON'))
+# modeling_mother(os.path.abspath('../JSON'))

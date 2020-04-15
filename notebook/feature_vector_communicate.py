@@ -107,7 +107,7 @@ def modeling_communicate(dirPath):
     communicate_df = pd.DataFrame(featureMatrixcommunicate)
 
     # Number of negative samples per folder needed to balance the dataset with positive and negative samples
-    count_neg_samples = communicate_df.shape[0] / 3
+    count_neg_samples = communicate_df.shape[0] / 5
     listDir = ['fun', 'really', 'hope', 'mother', 'buy']
     featureMatrixNotCommunicate = feature_matrix_extractor(dirPath, listDir, feature_vector_communicate, pos_sample=False,
                                                       th=count_neg_samples)
@@ -137,4 +137,4 @@ def modeling_communicate(dirPath):
 
 
 # TEST Function:
-modeling_communicate(os.path.abspath('../JSON'))
+# modeling_communicate(os.path.abspath('../JSON'))

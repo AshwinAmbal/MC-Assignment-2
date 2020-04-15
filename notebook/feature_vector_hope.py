@@ -97,7 +97,7 @@ def modeling_hope(dirPath):
 
 	# Number of negative samples per folder needed to balance the dataset with positive and negative samples
 	count_neg_samples = hope_df.shape[0] / 5
-	listDir = ['communicate', 'hope', 'mother', 'buy', 'really']
+	listDir = ['communicate', 'fun', 'mother', 'buy', 'really']
 	featureMatrixNotHope = feature_matrix_extractor(dirPath, listDir, feature_vector_hope, pos_sample=False,
 													  th=count_neg_samples)
 	not_hope_df = pd.DataFrame(featureMatrixNotHope)
@@ -125,5 +125,6 @@ def modeling_hope(dirPath):
 	true_labels = labelVector[train_size:]
 	print(classification_report(true_labels, pred_labels))
 
+
 # TEST Function:
-modeling_hope(os.path.abspath('../JSON'))
+# modeling_hope(os.path.abspath('../JSON'))

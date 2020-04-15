@@ -97,7 +97,7 @@ def modeling_really(dirPath):
 	really_df = pd.DataFrame(featureMatrixReally)
 
 	# Number of negative samples per folder needed to balance the dataset with positive and negative samples
-	count_neg_samples = really_df.shape[0] / 3
+	count_neg_samples = really_df.shape[0] / 4
 	listDir = ['communicate', 'hope', 'mother', 'buy']
 	featureMatrixNotReally = feature_matrix_extractor(dirPath, listDir, feature_vector_really, pos_sample=False,
 													  th=count_neg_samples)
@@ -128,4 +128,4 @@ def modeling_really(dirPath):
 
 
 # TEST Function:
-modeling_really(os.path.abspath('../JSON'))
+# modeling_really(os.path.abspath('../JSON'))

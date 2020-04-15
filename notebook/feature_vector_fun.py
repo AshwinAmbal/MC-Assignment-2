@@ -80,7 +80,7 @@ def modeling_fun(dirPath):
     fun_df = pd.DataFrame(featureMatrixFun)
 
     # Number of negative samples per folder needed to balance the dataset with positive and negative samples
-    count_neg_samples = fun_df.shape[0] / 3
+    count_neg_samples = fun_df.shape[0] / 5
     listDir = ['communicate', 'really', 'hope', 'mother', 'buy']
     featureMatrixNotFun = feature_matrix_extractor(dirPath, listDir, feature_vector_fun, pos_sample=False,
                                                       th=count_neg_samples)
@@ -111,4 +111,4 @@ def modeling_fun(dirPath):
 
 
 # TEST Function:
-modeling_fun(os.path.abspath('../JSON'))
+# modeling_fun(os.path.abspath('../JSON'))
