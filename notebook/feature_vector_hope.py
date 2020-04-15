@@ -6,9 +6,9 @@ import numpy as np
 from scipy.fftpack import fft
 from scipy import integrate
 from scipy.stats import kurtosis
-from src.pca_reduction import PCAReduction
-from src.utils import general_normalization, universal_normalization, trim_or_pad_data,	feature_matrix_extractor
-from src.utils import modelAndSave
+from notebook.pca_reduction import PCAReduction
+from notebook.utils import general_normalization, universal_normalization, trim_or_pad_data,	feature_matrix_extractor
+from notebook.utils import modelAndSave
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn import svm
@@ -124,3 +124,6 @@ def modeling_hope(dirPath):
 	pred_labels = clf.predict(final_df.iloc[train_size:, :])
 	true_labels = labelVector[train_size:]
 	print(classification_report(true_labels, pred_labels))
+
+# TEST Function:
+modeling_hope(os.path.abspath('../JSON'))

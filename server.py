@@ -1,12 +1,12 @@
 from flask import Flask, jsonify, request
 from cheroot.wsgi import Server as WSGIServer
-from src.utils import jsonToCSV, INDEX_TO_GESTURE
-from src.feature_vector_mother import feature_vector_mother
-from src.feature_vector_fun import feature_vector_fun
-from src.feature_vector_buy import feature_vector_buy
-from src.feature_vector_communicate import feature_vector_communicate
-from src.feature_vector_really import feature_vector_really
-from src.feature_vector_hope import feature_vector_hope
+from notebook.utils import jsonToCSV, INDEX_TO_GESTURE
+from notebook.feature_vector_mother import feature_vector_mother
+from notebook.feature_vector_fun import feature_vector_fun
+from notebook.feature_vector_buy import feature_vector_buy
+from notebook.feature_vector_communicate import feature_vector_communicate
+from notebook.feature_vector_really import feature_vector_really
+from notebook.feature_vector_hope import feature_vector_hope
 
 import pickle
 import os
@@ -35,7 +35,7 @@ def predict():
     buy = feature_vector_buy(extracted_df, test=True)
     communicate = feature_vector_communicate(extracted_df, test=True)
     fun = feature_vector_fun(extracted_df, test=True)
-    # hope = feature_vector_mother(extracted_df, test=True)
+    hope = feature_vector_hope(extracted_df, test=True)
     mother = feature_vector_mother(extracted_df, test=True)
     really = feature_vector_really(extracted_df, test=True)
     hope = feature_vector_hope(extracted_df, test=True)

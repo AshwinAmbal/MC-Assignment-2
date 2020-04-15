@@ -3,10 +3,10 @@ import numpy as np
 from sklearn import svm
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
-from src.pca_reduction import PCAReduction
+from notebook.pca_reduction import PCAReduction
 import os
-from src.utils import general_normalization, universal_normalization, trim_or_pad_data,	feature_matrix_extractor
-from src.utils import modelAndSave
+from notebook.utils import general_normalization, universal_normalization, trim_or_pad_data,	feature_matrix_extractor
+from notebook.utils import modelAndSave
 from sklearn.metrics import classification_report
 from sklearn.naive_bayes import GaussianNB
 from scipy import integrate
@@ -80,7 +80,7 @@ def modeling_fun(dirPath):
     fun_df = pd.DataFrame(featureMatrixFun)
 
     # Number of negative samples per folder needed to balance the dataset with positive and negative samples
-    count_neg_samples = fun_df.shape[0] / 5
+    count_neg_samples = fun_df.shape[0] / 3
     listDir = ['communicate', 'really', 'hope', 'mother', 'buy']
     featureMatrixNotFun = feature_matrix_extractor(dirPath, listDir, feature_vector_fun, pos_sample=False,
                                                       th=count_neg_samples)
@@ -111,4 +111,4 @@ def modeling_fun(dirPath):
 
 
 # TEST Function:
-# modeling_fun(os.path.abspath('../JSON'))
+modeling_fun(os.path.abspath('../JSON'))

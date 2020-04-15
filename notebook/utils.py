@@ -8,11 +8,13 @@ from sklearn import svm
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
-
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 INDEX_TO_GESTURE = {'A': 'buy', 'B': 'communicate', 'C': 'fun', 'D': 'hope', 'E': 'mother', 'F': 'really'}
 GESTURE_TO_INDEX = {'buy': 'A', 'communicate': 'B', 'fun': 'C', 'hope': 'D', 'mother': 'E', 'really': 'F'}
-MODEL_TO_INDEX = {'LogisticRegression': 1, 'SVC': 2, 'MLPClassifier': 3, 'GaussianNB': 4}
+MODEL_TO_INDEX = {'LogisticRegression': 1, 'RandomForestClassifier': 2, 'MLPClassifier': 3, 'DecisionTreeClassifier': 4}
 
 
 def trim_or_pad_data(data, TRIM_DATA_SIZE):
@@ -70,6 +72,8 @@ def feature_matrix_extractor(dirPath, listDir, extractor_method, pos_sample, th=
     for dir in listDir:
         files = os.listdir(os.path.join(dirPath, dir))
         for i, file in enumerate(files):
+            if file == '.DS_Store':
+                continue
             if th != -1 and i >= th:
                 break
             rawDataDict = []
@@ -87,7 +91,8 @@ def feature_matrix_extractor(dirPath, listDir, extractor_method, pos_sample, th=
 
 def modelAndSave(final_df, labelVector, gesture, pca, minmax):
     # clf = svm.SVC(random_state=42)
-    clf = svm.SVC(random_state=42, probability=True)
+    # clf = svm.SVC(random_state=42, probability=True)
+    clf = RandomForestClassifier(random_state=42)
     clf.fit(final_df, labelVector)
     writePickle(clf, gesture, pca, minmax)
 
@@ -99,7 +104,7 @@ def modelAndSave(final_df, labelVector, gesture, pca, minmax):
     clf.fit(final_df, labelVector)
     writePickle(clf, gesture, pca, minmax)
 
-    clf = GaussianNB()
+    clf = DecisionTreeClassifier()
     clf.fit(final_df, labelVector)
     writePickle(clf, gesture, pca, minmax)
 
