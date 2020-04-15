@@ -77,11 +77,11 @@ def feature_matrix_extractor(dirPath, listDir, extractor_method, pos_sample, th=
                 rawDataDict.extend(json.loads(row))
             rawData = jsonToCSV(rawDataDict)
             # rawData = pd.read_csv(os.path.join(dirPath, dir, file), sep=',')
-            featureVectorNotMother = extractor_method(rawData, pos_sample)
+            featureVector = extractor_method(rawData, pos_sample)
             if featureMatrix.shape[0] == 0:
-                featureMatrix = np.array([featureVectorNotMother])
+                featureMatrix = np.array([featureVector])
             else:
-                featureMatrix = np.concatenate((featureMatrix, [featureVectorNotMother]), axis=0)
+                featureMatrix = np.concatenate((featureMatrix, [featureVector]), axis=0)
     return featureMatrix
 
 

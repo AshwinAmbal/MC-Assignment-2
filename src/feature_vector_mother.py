@@ -10,7 +10,8 @@ from src.utils import general_normalization, universal_normalization, trim_or_pa
 from src.utils import feature_matrix_extractor, modelAndSave
 from sklearn.metrics import classification_report
 
-TRIM_DATA_SIZE_MOTHER = 150
+
+TRIM_DATA_SIZE_MOTHER = 120
 GESTURE = 'mother'
 
 
@@ -88,15 +89,19 @@ def modeling_mother(dirPath):
 
 	modelAndSave(final_df, labelVector, GESTURE, pca, minmax)
 
-	# 70:30 Train-Test Split
-	# train_size = int(final_df.shape[0] * 70 / 100)
-	# clf.fit(final_df.iloc[:train_size, :], labelVector[:train_size])
+	# clf = svm.SVC(random_state=42, probability=True)
+	# clf = svm.SVC(random_state=42)
+	clf = LogisticRegression(random_state=42)
+	# clf = MLPClassifier(max_iter=5000, random_state=42)
+	# clf = GaussianNB()
 
-	# print(clf.predict_proba(final_df.iloc[train_size:, :]))
-	# pred_labels = clf.predict(final_df.iloc[train_size:, :])
-	# true_labels = labelVector[train_size:]
-	# print(classification_report(true_labels, pred_labels))
+	# 70:30 Train-Test Split
+	train_size = int(final_df.shape[0] * 70 / 100)
+	clf.fit(final_df.iloc[:train_size, :], labelVector[:train_size])
+	pred_labels = clf.predict(final_df.iloc[train_size:, :])
+	true_labels = labelVector[train_size:]
+	print(classification_report(true_labels, pred_labels))
 
 
 # TEST Function:
-modeling_mother(os.path.abspath('../JSON'))
+# modeling_mother(os.path.abspath('../JSON'))

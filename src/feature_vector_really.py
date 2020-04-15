@@ -2,7 +2,6 @@ import os
 import pandas as pd
 import numpy as np
 
-import tsfresh.feature_extraction.feature_calculators as fc
 
 from scipy.fftpack import fft
 from scipy import integrate
@@ -17,7 +16,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 
 
-TRIM_DATA_SIZE_REALLY = 20
+TRIM_DATA_SIZE_REALLY = 30
 GESTURE = 'really'
 
 def feature_vector_really(data, isReally=False, test=False):
@@ -99,13 +98,13 @@ def modeling_really(dirPath):
 
 	# Number of negative samples per folder needed to balance the dataset with positive and negative samples
 	count_neg_samples = really_df.shape[0] / 5
-	listDir = ['communicate', 'really', 'hope', 'mother', 'buy']
+	listDir = ['communicate', 'hope', 'mother', 'buy']
 	featureMatrixNotReally = feature_matrix_extractor(dirPath, listDir, feature_vector_really, pos_sample=False,
 													  th=count_neg_samples)
 	not_really_df = pd.DataFrame(featureMatrixNotReally)
 
 	final_df = pd.concat([really_df, not_really_df], ignore_index=True)
-	shuffled_df = final_df.sample(frac=1).reset_index(drop=True)
+	shuffled_df = final_df.sample(frac=1, random_state=42).reset_index(drop=True)
 	labelVector = shuffled_df.pop(shuffled_df.shape[1]-1)
 	labelVector = labelVector.astype(int).tolist()
 
@@ -115,19 +114,18 @@ def modeling_really(dirPath):
 
 	# clf = svm.SVC(random_state=42, probability=True)
 	# clf = svm.SVC(random_state=42)
-	# clf = LogisticRegression(random_state=42)
+	clf = LogisticRegression(random_state=42)
 	# clf = MLPClassifier(max_iter=5000, random_state=42)
 	# clf = GaussianNB()
 
 
-	# # # 70:30 Train-Test Split
-	# train_size = int(final_df.shape[0] * 70 / 100)
-	# clf.fit(final_df.iloc[:train_size, :], labelVector[:train_size])
-	# pred_labels = clf.predict(final_df.iloc[train_size:, :])
-	# true_labels = labelVector[train_size:]
-	#
-	# print(classification_report(true_labels, pred_labels))
+	# 70:30 Train-Test Split
+	train_size = int(final_df.shape[0] * 70 / 100)
+	clf.fit(final_df.iloc[:train_size, :], labelVector[:train_size])
+	pred_labels = clf.predict(final_df.iloc[train_size:, :])
+	true_labels = labelVector[train_size:]
+	print(classification_report(true_labels, pred_labels))
 
 
 # TEST Function:
-modeling_really(os.path.abspath('./JSON'))
+# modeling_really(os.path.abspath('../JSON'))

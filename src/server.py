@@ -3,6 +3,10 @@ from cheroot.wsgi import Server as WSGIServer
 from src.utils import jsonToCSV, INDEX_TO_GESTURE
 from src.feature_vector_mother import feature_vector_mother
 from src.feature_vector_fun import feature_vector_fun
+from src.feature_vector_buy import feature_vector_buy
+from src.feature_vector_communicate import feature_vector_communicate
+from src.feature_vector_really import feature_vector_really
+
 import pickle
 import os
 import numpy as np
@@ -18,20 +22,21 @@ def get_result_from_model(model_index, gesture_id, feature_vector):
     feature_vector = pd.DataFrame([feature_vector])
     feature_vector = minmax.transform(feature_vector)
     feature_vector = pca.transform(feature_vector)
-    return model.predict_proba(feature_vector)[0][1]
+    result = model.predict_proba(feature_vector)[0]
+    return result[1] if np.argmax(result) == 1 else -result[0]
 
 
 @app.route('/',  methods=['GET', 'POST'])
 def predict():
-    received_data = request.get_json()
+    received_data = request.get_json(force=True)
     extracted_df = jsonToCSV(received_data)
-    # TODO: Change below feature vector calls to respective functions. Uncomment for debugging temporarily
-    # buy = feature_vector_fun(extracted_df, test=True)
-    # communicate = feature_vector_fun(extracted_df, test=True)
+    # TODO: Change hope feature vector calls to respective function. Uncomment for debugging temporarily
+    buy = feature_vector_buy(extracted_df, test=True)
+    communicate = feature_vector_communicate(extracted_df, test=True)
     fun = feature_vector_fun(extracted_df, test=True)
     # hope = feature_vector_mother(extracted_df, test=True)
     mother = feature_vector_mother(extracted_df, test=True)
-    # really = feature_vector_mother(extracted_df, test=True)
+    really = feature_vector_really(extracted_df, test=True)
     feature_vectors = [buy, communicate, fun, hope, mother, really]
     results = dict()
     for i in range(1, 5):

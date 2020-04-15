@@ -16,7 +16,7 @@ from sklearn.metrics import classification_report
 
 
 
-TRIM_DATA_SIZE_FUN = 40
+TRIM_DATA_SIZE_COMMUNICATE = 80
 GESTURE = 'communicate'
 
 def feature_vector_communicate_ind(trimmed_data, column_name, iscommunicate=False, test=False):
@@ -79,9 +79,9 @@ def feature_vector_communicate_ind(trimmed_data, column_name, iscommunicate=Fals
     featureVector = np.append(featureVector, maxDiffArray[index[0:5]])
     # featureVector = np.append(featureVector, diffNormRawData)
 
-    if TRIM_DATA_SIZE_FUN - 1 > featureVector.shape[0]:
-        featureVector = np.pad(featureVector, (0, TRIM_DATA_SIZE_FUN - featureVector.shape[0] - 1), 'constant')
-    featureVector = featureVector[:TRIM_DATA_SIZE_FUN - 1]
+    if TRIM_DATA_SIZE_COMMUNICATE - 1 > featureVector.shape[0]:
+        featureVector = np.pad(featureVector, (0, TRIM_DATA_SIZE_COMMUNICATE - featureVector.shape[0] - 1), 'constant')
+    featureVector = featureVector[:TRIM_DATA_SIZE_COMMUNICATE - 1]
     if not test:
         if iscommunicate:
             featureVector = np.append(featureVector, 1)
@@ -91,13 +91,12 @@ def feature_vector_communicate_ind(trimmed_data, column_name, iscommunicate=Fals
 
 
 def feature_vector_communicate(data, iscommunicate=False, test=False):
-    trimmed_data = trim_or_pad_data(data, TRIM_DATA_SIZE_FUN)
+    trimmed_data = trim_or_pad_data(data, TRIM_DATA_SIZE_COMMUNICATE)
 
-    featureVector = feature_vector_communicate_ind(trimmed_data, 'rightWrist_x', iscommunicate, test)
-    featureVector = np.append(featureVector, feature_vector_communicate_ind(trimmed_data, 'rightWrist_y', iscommunicate, test))
+    featureVector = feature_vector_communicate_ind(trimmed_data, 'rightWrist_x', iscommunicate, test=True)
+    featureVector = np.append(featureVector, feature_vector_communicate_ind(trimmed_data, 'rightWrist_y', iscommunicate, test=True))
+    featureVector = np.append(featureVector, feature_vector_communicate_ind(trimmed_data, 'leftWrist_y', iscommunicate, test=True))
     featureVector = np.append(featureVector, feature_vector_communicate_ind(trimmed_data, 'leftWrist_y', iscommunicate, test))
-    featureVector = np.append(featureVector, feature_vector_communicate_ind(trimmed_data, 'leftWrist_y', iscommunicate, test))
-
 
     return featureVector
 
@@ -109,13 +108,13 @@ def modeling_communicate(dirPath):
 
     # Number of negative samples per folder needed to balance the dataset with positive and negative samples
     count_neg_samples = communicate_df.shape[0] / 5
-    listDir = ['communicate', 'really', 'hope', 'mother', 'buy']
-    featureMatrixNotFun = feature_matrix_extractor(dirPath, listDir, feature_vector_communicate, pos_sample=False,
+    listDir = ['fun', 'really', 'hope', 'mother', 'buy']
+    featureMatrixNotCommunicate = feature_matrix_extractor(dirPath, listDir, feature_vector_communicate, pos_sample=False,
                                                       th=count_neg_samples)
-    not_communicate_df = pd.DataFrame(featureMatrixNotFun)
+    not_communicate_df = pd.DataFrame(featureMatrixNotCommunicate)
 
     final_df = pd.concat([communicate_df, not_communicate_df], ignore_index=True)
-    shuffled_df = final_df.sample(frac=1).reset_index(drop=True)
+    shuffled_df = final_df.sample(frac=1, random_state=42).reset_index(drop=True)
     labelVector = shuffled_df.pop(shuffled_df.shape[1]-1)
     labelVector = labelVector.astype(int).tolist()
 
@@ -126,21 +125,16 @@ def modeling_communicate(dirPath):
     # clf = svm.SVC(random_state=42, probability=True)
     # clf = svm.SVC(random_state=42)
     # clf = LogisticRegression(random_state=42)
-    # clf = MLPClassifier(max_iter=5000, random_state=42)
+    clf = MLPClassifier(max_iter=5000, random_state=42)
     # clf = GaussianNB()
-    # # # clf.fit(final_df, labelVector)
-    # # # # 70:30 Train-Test Split
-    # train_size = int(final_df.shape[0] * 70 / 100)
-    # print(train_size)
-    # print(labelVector)
-    # clf.fit(final_df.iloc[:train_size, :], labelVector[:train_size])
-    # # #
-    # # print(clf.predict_proba(final_df.iloc[train_size:, :]))
-    # pred_labels = clf.predict(final_df.iloc[train_size:, :])
-    # true_labels = labelVector[train_size:]
-    #
-    # print(classification_report(true_labels, pred_labels))
+    # clf.fit(final_df, labelVector)
+    # 70:30 Train-Test Split
+    train_size = int(final_df.shape[0] * 70 / 100)
+    clf.fit(final_df.iloc[:train_size, :], labelVector[:train_size])
+    pred_labels = clf.predict(final_df.iloc[train_size:, :])
+    true_labels = labelVector[train_size:]
+    print(classification_report(true_labels, pred_labels))
 
 
 # TEST Function:
-modeling_communicate(os.path.abspath('../JSON'))
+# modeling_communicate(os.path.abspath('../JSON'))
