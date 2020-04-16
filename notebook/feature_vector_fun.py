@@ -10,9 +10,9 @@ from notebook.utils import modelAndSave
 from sklearn.metrics import classification_report
 from sklearn.naive_bayes import GaussianNB
 from scipy import integrate
+import tsfresh.feature_extraction.feature_calculators as fc
 
-
-TRIM_DATA_SIZE_FUN = 70
+TRIM_DATA_SIZE_FUN = 50
 GESTURE = 'fun'
 
 
@@ -20,49 +20,35 @@ def feature_vector_fun(data, isFun=False, test=False):
     trimmed_data = trim_or_pad_data(data, TRIM_DATA_SIZE_FUN)
     rX = trimmed_data['rightWrist_x']
 
-    normRawColumn = general_normalization(rX)
-    normRawColumn = universal_normalization(normRawColumn, trimmed_data, x_norm=True)
-
-    diffNormRawData = np.diff(normRawColumn)
-
-    zeroCrossingArray = np.array([])
-    maxDiffArray = np.array([])
-
-    if diffNormRawData[0] > 0:
-        initSign = 1
-    else:
-        initSign = 0
-
-    windowSize = 5
+    normRawColumn = universal_normalization(rX, trimmed_data, x_norm=True)
+    normRawColumn = general_normalization(normRawColumn)
 
     # Area under curve
     auc = np.array([])
-    auc = np.append(auc, abs(integrate.simps(diffNormRawData, dx=5)))
+    auc = np.append(auc, abs(integrate.simps(normRawColumn, dx=5)))
 
-    for x in range(1, len(diffNormRawData)):
-        if diffNormRawData[x] > 0:
-            newSign = 1
-        else:
-            newSign = 0
+    # Absolute Sum of Consecutive Differences
+    scd = fc.absolute_sum_of_changes(normRawColumn)
 
-        if initSign != newSign:
-            zeroCrossingArray = np.append(zeroCrossingArray, x)
-            initSign = newSign
-            maxIndex = np.minimum(len(diffNormRawData), x + windowSize)
-            minIndex = np.maximum(0, x - windowSize)
+    # Entropy
+    entropy = fc.approximate_entropy(normRawColumn, 2, 3)
 
-            maxVal = np.amax(diffNormRawData[minIndex:maxIndex])
-            minVal = np.amin(diffNormRawData[minIndex:maxIndex])
+    # AutoCorrelation
+    ac = fc.autocorrelation(normRawColumn, lag=5)
 
-            maxDiffArray = np.append(maxDiffArray, (maxVal - minVal))
+    # Count Above Mean
+    cam = fc.count_above_mean(normRawColumn)
 
-    index = np.argsort(-maxDiffArray)
+    # Count Below Mean
+    cbm = fc.count_below_mean(normRawColumn)
 
     featureVector = np.array([])
     featureVector = np.append(featureVector, auc)
-    featureVector = np.append(featureVector, diffNormRawData)
-    featureVector = np.append(featureVector, zeroCrossingArray[index[0:5]])
-    featureVector = np.append(featureVector, maxDiffArray[index[0:5]])
+    featureVector = np.append(featureVector, scd)
+    featureVector = np.append(featureVector, entropy)
+    featureVector = np.append(featureVector, ac)
+    featureVector = np.append(featureVector, cam)
+    featureVector = np.append(featureVector, cbm)
     if TRIM_DATA_SIZE_FUN - 1 > featureVector.shape[0]:
         featureVector = np.pad(featureVector, (0, TRIM_DATA_SIZE_FUN - featureVector.shape[0] - 1), 'constant')
     featureVector = featureVector[:TRIM_DATA_SIZE_FUN - 1]
@@ -80,7 +66,7 @@ def modeling_fun(dirPath):
     fun_df = pd.DataFrame(featureMatrixFun)
 
     # Number of negative samples per folder needed to balance the dataset with positive and negative samples
-    count_neg_samples = fun_df.shape[0] / 5
+    count_neg_samples = fun_df.shape[0] / 6
     listDir = ['communicate', 'really', 'hope', 'mother', 'buy']
     featureMatrixNotFun = feature_matrix_extractor(dirPath, listDir, feature_vector_fun, pos_sample=False,
                                                       th=count_neg_samples)

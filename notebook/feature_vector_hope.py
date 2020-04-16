@@ -16,15 +16,15 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 
 
-TRIM_DATA_SIZE_HOPE = 30
+TRIM_DATA_SIZE_HOPE = 40
 GESTURE = 'hope'
 
 def feature_vector_hope(data, isHope=False, test=False):
 	trimmed_data = trim_or_pad_data(data, TRIM_DATA_SIZE_HOPE)
 	rY = trimmed_data['rightWrist_y']
 	lY = trimmed_data['leftWrist_y']
-	normRawColumn = general_normalization(rY)
-	normRawColumn = universal_normalization(normRawColumn, trimmed_data, x_norm=False)
+	normRawColumn = universal_normalization(rY, trimmed_data, x_norm=False)
+	normRawColumn = general_normalization(normRawColumn)
 
 	diffNormRawData = np.diff(normRawColumn)
 
@@ -77,7 +77,6 @@ def feature_vector_hope(data, isHope=False, test=False):
 	featureVector = np.append(featureVector, fftArray)
 	featureVector = np.append(featureVector, auc)
 	featureVector = np.append(featureVector, kur)
-	featureVector = np.append(featureVector, zeroCrossingArray[index[0:5]])
 	featureVector = np.append(featureVector, maxDiffArray[index[0:5]])
 
 	if TRIM_DATA_SIZE_HOPE - 1> featureVector.shape[0]:
@@ -96,7 +95,7 @@ def modeling_hope(dirPath):
 	hope_df = pd.DataFrame(featureMatrixHope)
 
 	# Number of negative samples per folder needed to balance the dataset with positive and negative samples
-	count_neg_samples = hope_df.shape[0] / 5
+	count_neg_samples = hope_df.shape[0] / 6
 	listDir = ['communicate', 'fun', 'mother', 'buy', 'really']
 	featureMatrixNotHope = feature_matrix_extractor(dirPath, listDir, feature_vector_hope, pos_sample=False,
 													  th=count_neg_samples)

@@ -21,9 +21,11 @@ GESTURE = 'buy'
 def feature_vector_buy_ind(trimmed_data, column_name, isBuy=False, test=False):
 
     r = trimmed_data[column_name]
-
-    normRawColumn = general_normalization(r)
-    normRawColumn = universal_normalization(normRawColumn, trimmed_data, x_norm=True)
+    if column_name == 'rightWrist_x':
+        normRawColumn = universal_normalization(r, trimmed_data, x_norm=True)
+    else:
+        normRawColumn = universal_normalization(r, trimmed_data, x_norm=False)
+    normRawColumn = general_normalization(normRawColumn)
 
     diffNormRawData = np.diff(normRawColumn)
 
@@ -74,9 +76,7 @@ def feature_vector_buy_ind(trimmed_data, column_name, isBuy=False, test=False):
     featureVector = np.array([])
     featureVector = np.append(featureVector, fftArray)
     featureVector = np.append(featureVector, windowedVal)
-    featureVector = np.append(featureVector, zeroCrossingArray[index[0:5]])
     featureVector = np.append(featureVector, maxDiffArray[index[0:5]])
-    # featureVector = np.append(featureVector, diffNormRawData)
 
     if TRIM_DATA_SIZE_BUY - 1 > featureVector.shape[0]:
         featureVector = np.pad(featureVector, (0, TRIM_DATA_SIZE_BUY - featureVector.shape[0] - 1), 'constant')

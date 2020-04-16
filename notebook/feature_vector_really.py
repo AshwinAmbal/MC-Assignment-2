@@ -23,29 +23,29 @@ def feature_vector_really(data, isReally=False, test=False):
 	trimmed_data = trim_or_pad_data(data, TRIM_DATA_SIZE_REALLY)
 	rY = trimmed_data['rightWrist_y']
 	lY = trimmed_data['leftWrist_y']
-	normRawColumn = general_normalization(rY)
-	normRawColumn = universal_normalization(normRawColumn, trimmed_data, x_norm=False)
+	normRawColumn = universal_normalization(rY, trimmed_data, x_norm=False)
+	normRawColumn = general_normalization(normRawColumn)
 
 	diffNormRawData = np.diff(normRawColumn)
-
-	zeroCrossingArray = np.array([])
-	maxDiffArray = np.array([])
 
 	#Fast Fourier Transform
 	fftArray = np.array([])
 	fftVal = []
-	fft_coefficients = fft(diffNormRawData, n=6)[1:]
+	fft_coefficients = fft(normRawColumn, n=6)[1:]
 	fft_coefficients_real = [value.real for value in fft_coefficients]
 	fftVal += fft_coefficients_real
 	fftArray = np.append(fftArray, fftVal)
 
 	#Area under curve
 	auc = np.array([])
-	auc = np.append(auc, abs(integrate.simps(diffNormRawData, dx=5)))
+	auc = np.append(auc, abs(integrate.simps(normRawColumn, dx=5)))
 	
 	#Kurtosis
 	kur = np.array([])
-	kur = np.append(kur, kurtosis(diffNormRawData))
+	kur = np.append(kur, kurtosis(normRawColumn))
+
+	zeroCrossingArray = np.array([])
+	maxDiffArray = np.array([])
 
 	if diffNormRawData[0] > 0:
 		initSign = 1
@@ -97,7 +97,7 @@ def modeling_really(dirPath):
 	really_df = pd.DataFrame(featureMatrixReally)
 
 	# Number of negative samples per folder needed to balance the dataset with positive and negative samples
-	count_neg_samples = really_df.shape[0] / 4
+	count_neg_samples = really_df.shape[0] / 6
 	listDir = ['communicate', 'hope', 'mother', 'buy']
 	featureMatrixNotReally = feature_matrix_extractor(dirPath, listDir, feature_vector_really, pos_sample=False,
 													  th=count_neg_samples)

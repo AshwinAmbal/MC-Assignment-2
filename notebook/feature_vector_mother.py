@@ -19,8 +19,8 @@ def feature_vector_mother(data, isMother=False, test=False):
 	trimmed_data = trim_or_pad_data(data, TRIM_DATA_SIZE_MOTHER)
 	rY = trimmed_data['rightWrist_y']
 
-	normRawColumn = general_normalization(rY)
-	normRawColumn = universal_normalization(normRawColumn, trimmed_data, x_norm=False)
+	normRawColumn = universal_normalization(rY, trimmed_data, x_norm=False)
+	normRawColumn = general_normalization(normRawColumn)
 
 	diffNormRawData = np.diff(normRawColumn)
 
@@ -54,7 +54,6 @@ def feature_vector_mother(data, isMother=False, test=False):
 	index = np.argsort(-maxDiffArray)
 
 	featureVector = np.array([])
-	featureVector = np.append(featureVector, diffNormRawData)
 	featureVector = np.append(featureVector, zeroCrossingArray[index[0:5]])
 	featureVector = np.append(featureVector, maxDiffArray[index[0:5]])
 	if TRIM_DATA_SIZE_MOTHER - 1> featureVector.shape[0]:
@@ -74,7 +73,7 @@ def modeling_mother(dirPath):
 	mother_df = pd.DataFrame(featureMatrixMother)
 
 	# Number of negative samples per folder needed to balance the dataset for positive and negative samples
-	count_neg_samples = mother_df.shape[0] / 5
+	count_neg_samples = mother_df.shape[0] / 4
 	listDir = ['communicate', 'really', 'hope', 'fun', 'buy']
 	featureMatrixNotMother = feature_matrix_extractor(dirPath, listDir, feature_vector_mother, pos_sample=False,
 													  th=count_neg_samples)
